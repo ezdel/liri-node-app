@@ -15,21 +15,25 @@ var client = new twitter({
 	access_token_key: keys.twitterKeys.access_token_key,
 	access_token_secret: keys.twitterKeys.access_token_secret
 });
-
-if (process.argv[2] === 'do-what-it-says'){
-	fs.readFile('random.txt', 'utf8', function(err, data){
-		var dataArray = data.split(',');
-		method = dataArray[0];
-		name = dataArray[1];
-		console.log(method);
-		console.log(name);
-	});
-}
-else {
-	method = process.argv[2];
+function checkMethod(){
+	if (process.argv[2] === 'do-what-it-says'){
+		fs.readFile('random.txt', 'utf8', function(err, data){
+			var dataArray = data.split(',');
+			method = dataArray[0];
+			name = dataArray[1];
+			return method;
+			return name;
+		});
+	}
+	else{
+		method = process.argv[2];
+		return method;
+	};
 };
+checkMethod();
 
-if (method === 'my-tweets'){
+	switch (method){
+	case 'my-tweets':
 	var twitterparams = {screen_name: 'EricTheZuck', count: '20', trim_user: true};
 	client.get('statuses/user_timeline', twitterparams, function(error, tweets, response){
 		if (!error) {
@@ -38,16 +42,19 @@ if (method === 'my-tweets'){
 				console.log(tweets[i].text);
 				console.log(tweets[i].created_at);
 				console.log('---------------------');
-				fs.appendFile('log.txt', tweets[i].text + ' ' + tweets[i].created_at + ' ');
-				
+				fs.appendFile('log.txt', tweets[i].text + ' ' + tweets[i].created_at + ' ');	
 			};	
 		};
 	});
-};
+	break;
 
-if (method === 'spotify-this-song'){
+	case 'spotify-this-song':
+	console.log(method);
 	var songArgs = nodeArgs.slice(3);
-	if (songArgs.length < 1){
+	if (name.length > 0){
+		name = name;
+	}
+	else if (songArgs.length < 1){
 		name = "All That She Wants";
 	}
 	else{
@@ -66,9 +73,9 @@ if (method === 'spotify-this-song'){
 			fs.appendFile('log.txt', 'Song: ' + data.tracks.items[0].name + ' ' + 'Artist: ' + data.tracks.items[0].artists[0].name + ' ' + 'Preview Link: ' + data.tracks.items[0].external_urls.spotify + ' ' + 'Album: ' + data.tracks.items[0].album.name + ' ');
 		};
 	});
-};
+	break;
 
-if (method === 'movie-this'){
+	case 'movie-this':
 	var movieArgs = nodeArgs.slice(3);
 	if (movieArgs.length < 1){
 		name = "Mr. Nobody"
@@ -96,5 +103,6 @@ if (method === 'movie-this'){
 			fs.appendFile('log.txt', 'Title: ' + JSON.parse(body)["Title"] + ' ' + 'Year: ' + JSON.parse(body)["Year"] + ' ' + 'IMDB Rating: ' + JSON.parse(body)["imdbRating"] + ' ' + 'Country: ' + JSON.parse(body)["Country"] + ' ' + 'Language: ' + JSON.parse(body)["Language"] + ' ' + 'Plot: ' + JSON.parse(body)["Plot"] + ' ' + 'Actors: ' + JSON.parse(body)["Actors"] + ' ' + 'Tomato Meter: ' + JSON.parse(body)["tomatoMeter"] + ' ' + 'Rotten Tomatoes URL: ' + JSON.parse(body)["tomatoURL"] + ' ');
 		};
 	});
+	break;
 };
 
